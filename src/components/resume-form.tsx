@@ -2,26 +2,26 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-    Briefcase,
-    CalendarRange,
-    GraduationCap,
-    Link,
-    Mail,
-    Phone,
-    Plus,
-    Trash2,
-    User,
-    Wrench,
+  Briefcase,
+  CalendarRange,
+  GraduationCap,
+  Link,
+  Mail,
+  Phone,
+  Plus,
+  Trash2,
+  User,
+  Wrench,
 } from "lucide-react";
 import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
 
@@ -78,6 +78,7 @@ export function ResumeForm({ resumeData, setResumeData }: ResumeFormProps) {
   ) => {
     const { name, value } = e.target;
     const updatedExperience = [...resumeData.experience];
+    if (!updatedExperience[index]) return; // Safety check
     updatedExperience[index] = { ...updatedExperience[index], [name]: value };
     setResumeData((prev) => ({ ...prev, experience: updatedExperience }));
   };
@@ -113,6 +114,7 @@ export function ResumeForm({ resumeData, setResumeData }: ResumeFormProps) {
   ) => {
     const { name, value } = e.target;
     const updatedEducation = [...resumeData.education];
+    if (!updatedEducation[index]) return; // Safety check
     updatedEducation[index] = { ...updatedEducation[index], [name]: value };
     setResumeData((prev) => ({ ...prev, education: updatedEducation }));
   };
@@ -187,11 +189,11 @@ export function ResumeForm({ resumeData, setResumeData }: ResumeFormProps) {
 
   // Navigation tabs with icons
   const NavigationTabs = () => (
-    <div className="flex space-x-1 mb-6 bg-muted rounded-lg p-1">
+    <div className="flex flex-col sm:flex-row gap-1 mb-6 bg-muted rounded-lg p-1">
       <Button
         variant={activeSection === "contact" ? "default" : "ghost"}
         size="sm"
-        className="flex-1"
+        className="flex-1 justify-center"
         onClick={() => setActiveSection("contact")}
       >
         <User className="h-4 w-4 mr-2" /> Contact
@@ -199,7 +201,7 @@ export function ResumeForm({ resumeData, setResumeData }: ResumeFormProps) {
       <Button
         variant={activeSection === "experience" ? "default" : "ghost"}
         size="sm"
-        className="flex-1"
+        className="flex-1 justify-center"
         onClick={() => setActiveSection("experience")}
       >
         <Briefcase className="h-4 w-4 mr-2" /> Experience
@@ -207,7 +209,7 @@ export function ResumeForm({ resumeData, setResumeData }: ResumeFormProps) {
       <Button
         variant={activeSection === "education" ? "default" : "ghost"}
         size="sm"
-        className="flex-1"
+        className="flex-1 justify-center"
         onClick={() => setActiveSection("education")}
       >
         <GraduationCap className="h-4 w-4 mr-2" /> Education
@@ -215,7 +217,7 @@ export function ResumeForm({ resumeData, setResumeData }: ResumeFormProps) {
       <Button
         variant={activeSection === "skills" ? "default" : "ghost"}
         size="sm"
-        className="flex-1"
+        className="flex-1 justify-center"
         onClick={() => setActiveSection("skills")}
       >
         <Wrench className="h-4 w-4 mr-2" /> Skills
