@@ -15,13 +15,14 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import { AlertCircle, ArrowLeft, Download, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-// Remove the params interface completely and use the id directly from props
+interface PreviewPageProps {
+  params: {
+    id: string;
+  };
+  searchParams?: Record<string, string | string[] | undefined>;
+}
 
-export default function PreviewPage({ 
-  params 
-}: { 
-  params: { id: string } 
-}) {
+export default function PreviewPage({ params }: PreviewPageProps) {
   const { id } = params;
   const { user, isLoading: authLoading } = useAuth();
   const [resume, setResume] = useState<SavedResume | null>(null);
