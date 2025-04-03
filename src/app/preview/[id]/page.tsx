@@ -1,28 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/context/auth-context';
+import { ResumeData } from '@/app/page';
 import { ResumePDF } from '@/components/resume-pdf';
 import { ResumePreview } from '@/components/resume-preview';
-import { ResumeData } from '@/app/page';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { useAuth } from '@/context/auth-context';
 import { ResumeTemplateType } from '@/lib/resume-templates';
 import { SavedResume, getResumeById, trackResumeDownload } from '@/services/resume-service';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { AlertCircle, ArrowLeft, Download, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { use, useEffect, useState } from 'react';
 
-interface PreviewPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function PreviewPage({ params }: PreviewPageProps) {
-  const { id } = params;
+export default function PreviewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { user, isLoading: authLoading } = useAuth();
   const [resume, setResume] = useState<SavedResume | null>(null);
   const [isLoading, setIsLoading] = useState(true);
