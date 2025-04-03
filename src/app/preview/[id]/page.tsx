@@ -19,6 +19,7 @@ interface PreviewPageProps {
   params: {
     id: string;
   };
+  searchParams?: Record<string, string | string[] | undefined>;
 }
 
 export default function PreviewPage({ params }: PreviewPageProps) {
