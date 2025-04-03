@@ -14,6 +14,7 @@ import { checkPremiumStatus } from '@/services/resume-service';
 import { Loader2, Save, ShieldCheck, User as UserIcon, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { BillingSection } from './billing_section';
 
 export default function Profile() {
   const { user, isLoading: authLoading, signOut } = useAuth();
@@ -263,6 +264,7 @@ export default function Profile() {
                   </li>
                 </ul>
               </div>
+            <BillingSection />
             </CardContent>
             <CardFooter className="justify-between border-t pt-5">
               <div className="text-sm text-muted-foreground">
