@@ -1,5 +1,6 @@
 import { TEMPLATE_PRICE } from '@/lib/pricing';
 import { ResumeTemplateType, resumeTemplates } from '@/lib/resume-templates';
+import { supabase } from '@/lib/supabase';
 
 // Define the LemonSqueezy checkout response type
 export interface LemonSqueezyCheckout {
@@ -10,14 +11,10 @@ export interface LemonSqueezyCheckout {
 // Create a checkout session for template purchase
 export async function createCheckoutSession(
   templateId: ResumeTemplateType,
+  templateName: string,
+  userData: { id: string, email: string },
   returnUrl: string
 ): Promise<LemonSqueezyCheckout> {
-  const template = resumeTemplates.find(t => t.id === templateId);
-  
-  if (!template) {
-    throw new Error(`Template with ID ${templateId} not found`);
-  }
-  
   const response = await fetch('/api/checkout/create-session', {
     method: 'POST',
     headers: {
@@ -25,8 +22,8 @@ export async function createCheckoutSession(
     },
     body: JSON.stringify({
       templateId,
-      templateName: template.name,
-      price: TEMPLATE_PRICE,
+      templateName,
+      userData, // Pass user data directly
       returnUrl,
     }),
   });
@@ -41,9 +38,10 @@ export async function createCheckoutSession(
 
 // Verify a purchase was successful
 export async function verifyPurchase(
-  orderId: string
+  orderId: string,
+  userId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const response = await fetch(`/api/checkout/verify-order?order_id=${orderId}`);
+  const response = await fetch(`/api/checkout/verify-order?order_id=${orderId}&user_id=${userId}`);
   
   if (!response.ok) {
     const error = await response.text();

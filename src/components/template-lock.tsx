@@ -49,31 +49,40 @@ export function TemplateLock({
     checkAccess();
   }, [templateId, user]);
 
-  const handlePurchase = async () => {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
+  // In template-lock.tsx
+const handlePurchase = async () => {
+  if (!user) {
+    setShowAuthModal(true);
+    return;
+  }
 
-    setIsPurchasing(true);
-    try {
-      // Create checkout session with LemonSqueezy
-      const session = await createCheckoutSession(
-        templateId,
-        `${window.location.origin}/templates/success`
-      );
-      
-      // Redirect to LemonSqueezy checkout page
-      if (session.url) {
-        window.location.href = session.url;
-      }
-    } catch (error) {
-      console.error("Error creating checkout session:", error);
-      alert("Failed to start checkout process. Please try again.");
-    } finally {
-      setIsPurchasing(false);
+  setIsPurchasing(true);
+  try {
+    // Pass user data directly to the service
+    const userData = {
+      id: user.id,
+      email: user.email || '',
+    };
+    
+    // Create checkout session with LemonSqueezy
+    const session = await createCheckoutSession(
+      templateId,
+      templateName,
+      userData,
+      `${window.location.origin}/templates/success`
+    );
+    
+    // Redirect to LemonSqueezy checkout page
+    if (session.url) {
+      window.location.href = session.url;
     }
-  };
+  } catch (error) {
+    console.error("Error creating checkout session:", error);
+    alert("Failed to start checkout process. Please try again.");
+  } finally {
+    setIsPurchasing(false);
+  }
+};
 
   const handleUnlock = () => {
     if (onUnlocked) {

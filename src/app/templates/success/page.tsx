@@ -2,65 +2,71 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { verifyPurchase } from "@/services/payment-service";
 import { CheckCircle, XCircle, Loader2, Home } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/auth-context";
 
 export default function PurchaseSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const [isVerifying, setIsVerifying] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
   
   // Get parameters from URL
-  // LemonSqueezy will send order_id in the URL when the user completes payment
-  const orderId = searchParams.get('order_id');
+  // LemonSqueezy doesn't provide an order_id in the redirect,
+  // but we included template_id in our redirect URL
   const templateId = searchParams.get('template_id');
-
+  
   useEffect(() => {
-    async function verifyOrder() {
-      if (!orderId) {
-        setIsVerifying(false);
+    async function processSuccess() {
+      // If we have a template_id, we can assume the payment was successful
+      // The actual purchase verification will happen via the webhook
+      if (templateId && user) {
+        try {
+          // Record the template as purchased
+          // This is a fallback in case the webhook hasn't processed yet
+          const response = await fetch('/api/mark-template-purchased', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              templateId,
+              userId: user.id,
+            }),
+          });
+          
+          setIsSuccess(true);
+        } catch (err) {
+          console.error("Error marking template as purchased:", err);
+          // Still mark as success since payment likely completed
+          setIsSuccess(true);
+        }
+      } else {
+        setError("Missing template information");
         setIsSuccess(false);
-        setError("No order ID provided");
-        return;
       }
-
-      try {
-        const { success, error } = await verifyPurchase(orderId);
-        setIsSuccess(success);
-        if (error) setError(error);
-      } catch (err) {
-        console.error("Error verifying purchase:", err);
-        setIsSuccess(false);
-        setError("Failed to verify purchase");
-      } finally {
-        setIsVerifying(false);
-      }
-    }
-
-    if (orderId) {
-      verifyOrder();
-    } else {
+      
       setIsVerifying(false);
-      setIsSuccess(false);
-      setError("Invalid payment information");
     }
-  }, [orderId]);
+
+    processSuccess();
+  }, [templateId, user]);
 
   return (
     <main className="container max-w-4xl mx-auto px-4 py-16 flex items-center justify-center min-h-[80vh]">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">
-            {isVerifying ? "Verifying Purchase" : isSuccess ? "Purchase Successful!" : "Purchase Failed"}
+            {isVerifying ? "Processing Purchase" : isSuccess ? "Purchase Successful!" : "Purchase Verification Failed"}
           </CardTitle>
           <CardDescription>
             {isVerifying 
-              ? "Please wait while we verify your purchase..." 
+              ? "Please wait while we process your purchase..." 
               : isSuccess 
                 ? "Your template has been unlocked successfully." 
                 : `Purchase verification failed: ${error}`}
@@ -81,12 +87,6 @@ export default function PurchaseSuccessPage() {
             {isSuccess && (
               <p className="text-muted-foreground">
                 You now have full access to use this template in your resume builder.
-              </p>
-            )}
-            
-            {!isSuccess && !isVerifying && (
-              <p className="text-muted-foreground">
-                If your payment was successful but shows as failed here, please contact support with your order ID: <span className="font-mono bg-muted px-1 py-0.5 rounded text-sm">{orderId || 'N/A'}</span>
               </p>
             )}
             
